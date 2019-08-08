@@ -60,13 +60,17 @@ function clientSelect() {
         connection.query(queryString, filter, function(error, results) {
             if (error) throw error;
             var quantityInStock = results[0].stock_quantity;
+            var itemCost = results[0].price;
             console.log("\nYou would like to purchase: " + results[0].product_name + ", item ID: " + itemID);
             console.log("You would like to purchase " + itemQuantity + " of this product.");
             console.log("\n--------------------------------------\n")
             if (itemQuantity > quantityInStock) {
                 console.log("Sorry, we don't have enough of that product. There are " + quantityInStock + " of this product avaiable.\nPlease try your order again.");
             } else {
+                var totalPrice = itemCost * itemQuantity;
                 console.log("Thank you for your purchase of " + itemQuantity + " " + results[0].product_name + ".");
+                console.log("Your Total: $" + totalPrice);
+
                 var newQuantity = quantityInStock - itemQuantity;
                 updateStock(itemID, newQuantity);
             }
@@ -77,14 +81,13 @@ function clientSelect() {
 }
 
 function updateStock(itemID, newQuantity) {
-console.log("Item ID: " + itemID + "   Quantity: " + newQuantity);
+
 var itemID1 = parseInt(itemID, 10);
 var newQuantity1 = parseInt(newQuantity, 10);
-console.log(itemID1 + "   " + newQuantity1);
 var queryString = 'UPDATE products SET stock_quantity=' + newQuantity1 + ' WHERE item_id=' + itemID1 + ';';
     connection.query(queryString, function(error, results) {
         if (error) throw error;
-        console.log("Stock updated.");
+        console.log("\nStock updated.");
     });
 connection.end();
 }
