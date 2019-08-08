@@ -1,4 +1,7 @@
 var mysql      = require('mysql');
+var inquirer = require('inquirer');
+
+
 var connection = mysql.createConnection({
   host     : '127.0.0.1',
   user     : 'merchant',
@@ -26,16 +29,46 @@ if (started == true){
           console.log("Stock Quantity: " + value.stock_quantity);
           console.log("\n----------------------------------- \n")
       }
+      clientSelect();
     });
      
-    connection.end();
+    // connection.end();
 }
 
-var inquirer = require('inquirer');
-inquirer
-  .prompt([
-    /* Pass your questions in here */
-  ])
-  .then(answers => {
-    // Use user feedback for... whatever!!
-  });
+
+function clientSelect() {
+
+    inquirer
+    .prompt([
+        {
+        type: 'input',
+        name: 'select_item',
+        message: "Please type the item ID of the item you would like to purchase:\n "
+        },
+        {
+        type: 'input',
+        name: 'select_quantity',
+        message: "Please type the quantity of the item you would like to purchase:\n "
+        }
+    ])
+    .then(answers => {
+        var itemID = answers.select_item;
+        var itemQuantity = answers.select_quantity;
+        var queryString = 'SELECT * FROM products WHERE item_id = ?;'
+        var filter = [itemID];
+        connection.query(queryString, filter, function(error, results) {
+            if (error) throw error;
+            var quantityInStock = results[0].stock_quantity;
+            console.log("\nYou would like to purchase: " + results[0].product_name + ", item ID: " + itemID);
+            console.log("You would like to purchase " + itemQuantity + " of this product.");
+            console.log("\n--------------------------------------\n")
+            if (itemQuantity > quantityInStock) {
+                console.log("Sorry, we don't have enough of that product. There are " + quantityInStock + " of this product avaiable.\nPlease try your order again.");
+            } else {
+                console.log("Thank you for your purchase of " + itemQuantity + " " + results[0].product_name + ".");
+            }
+        });
+        connection.end();
+
+    });
+}
