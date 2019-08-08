@@ -22,6 +22,7 @@ if (started == true){
  
     connection.query('SELECT * FROM products;', function (error, results, fields) {
       if (error) throw error;
+      
       for (const value of results) {
           console.log("Item Id: " + value.item_id);
           console.log("Product Name: " + value.product_name);
@@ -66,9 +67,24 @@ function clientSelect() {
                 console.log("Sorry, we don't have enough of that product. There are " + quantityInStock + " of this product avaiable.\nPlease try your order again.");
             } else {
                 console.log("Thank you for your purchase of " + itemQuantity + " " + results[0].product_name + ".");
+                var newQuantity = quantityInStock - itemQuantity;
+                updateStock(itemID, newQuantity);
             }
         });
-        connection.end();
+        
 
     });
+}
+
+function updateStock(itemID, newQuantity) {
+console.log("Item ID: " + itemID + "   Quantity: " + newQuantity);
+var itemID1 = parseInt(itemID, 10);
+var newQuantity1 = parseInt(newQuantity, 10);
+console.log(itemID1 + "   " + newQuantity1);
+var queryString = 'UPDATE products SET stock_quantity=' + newQuantity1 + ' WHERE item_id=' + itemID1 + ';';
+    connection.query(queryString, function(error, results) {
+        if (error) throw error;
+        console.log("Stock updated.");
+    });
+connection.end();
 }
