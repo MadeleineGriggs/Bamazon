@@ -82,8 +82,9 @@ function updateStock(itemID, newQuantity) {
 
 var itemID1 = itemID;
 var newQuantity1 = newQuantity;
-var queryString = 'UPDATE products SET stock_quantity=' + newQuantity1 + ' WHERE item_id=' + itemID1 + ';';
-    connection.query(queryString, function(error, results) {
+var queryString = 'UPDATE products SET stock_quantity=? WHERE item_id=?;';
+var filter = [newQuantity1, itemID1]
+    connection.query(queryString,filter , function(error, results) {
         if (error) throw error;
         console.log("\nStock updated.");
     });

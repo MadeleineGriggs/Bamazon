@@ -46,6 +46,7 @@ function afterConnect() {
             break;
             case 'Add to Inventory':
                 addInventory();
+            break;
             case 'Add New Product':
                 addProduct();
             break;
@@ -65,7 +66,7 @@ function viewProducts() {
             console.log("\n----------------------------------- \n")
         }
     })
-
+    connection.end();
 }
 
 function viewInventory() {
@@ -81,6 +82,7 @@ function viewInventory() {
                 console.log("\n----------------------------------- \n")
             }
         });
+        connection.end();
     };
 
 function addInventory() {
@@ -99,14 +101,37 @@ function addInventory() {
         }
     ])
     .then(answers => {
+        var itemID = answers.add_stock;
+        var itemQuantity = answers.add_numb;
         var queryString = 'SELECT * FROM products WHERE item_id = ?;'
         var filter = [itemID];
+        
         connection.query(queryString, filter, function(error, results) {
             if (error) throw error;
-        });
+            var quantityInStock = results[0].stock_quantity;
+            var newQuantity = parseInt(quantityInStock) + parseInt(itemQuantity);
+            console.log("\nYou would like to add stock to: " + results[0].product_name + ", item ID: " + itemID);
+            console.log("You would like to add " + itemQuantity + " of this product.");
+            console.log("\n--------------------------------------\n")
+                updateStock(itemID, newQuantity);
+            })
 
     });
 }
+
+function updateStock(itemID, newQuantity) {
+
+    var itemID1 = itemID;
+    var newQuantity1 = newQuantity;
+    var queryString = 'UPDATE products SET stock_quantity=? WHERE item_id=?;';
+    var filter = [newQuantity1, itemID1]
+        connection.query(queryString,filter , function(error, results) {
+            if (error) throw error;
+            console.log("\nStock updated.");
+        });
+    connection.end();
+}
+
 
 function addProduct() {
     console.log("Manager would like to add a new product.")
@@ -114,17 +139,36 @@ function addProduct() {
     .prompt([
         {
         type: 'input',
-        name: 'menu_options',
-        message: "Please select the action you would like:\n",
-        choices: ['View Products for Sale', 'View Low Inventory', 'Add to Inventory', 'Add New Product']
+        name: 'product_name',
+        message: "Please type the name of the product:\n",
+        },
+        {
+        type: 'input',
+        name: 'department_name',
+        message: "Please type the department name:\n",
+        },
+        {
+        type: 'input',
+        name: 'price',
+        message: "Please type the price of the product:\n",
+        },
+        {
+        type: 'input',
+        name: 'stock_quantity',
+        message: "Please type amount of initial product stock:\n",
         }
     ])
     .then(answers => {
-        var queryString = 'SELECT * FROM products WHERE item_id = ?;'
-        var filter = [itemID];
+        var productName = answers.product_name;
+        var departName = answers.department_name;
+        var price = answers.price;
+        var stockQuant = answers.stock_quantity;
+        var queryString = 'INSERT INTO products (product_name, department_name, price, stock_quantity) VALUES (?, ?, ?, ?)'
+        var filter = [productName, departName, price, stockQuant];
         connection.query(queryString, filter, function(error, results) {
             if (error) throw error;
+            console.log("New Product Added.");
         });
-
+        connection.end();
     });
 }
