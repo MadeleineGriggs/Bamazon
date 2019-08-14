@@ -11,30 +11,28 @@ var connection = mysql.createConnection({
  
 
 
-var started = false;
+connection.connect(function(err) {
+    if (err) throw err;
+    console.log("\nWelcome to Bamazon!\n");
+    afterConnect();
+});
 
-if (started === false) {
-console.log("Welcome to Bamazon! \n");
-started = true;
-};
-if (started == true){
-    connection.connect();
- 
+
+function afterConnect() {
     connection.query('SELECT * FROM products;', function (error, results, fields) {
-      if (error) throw error;
-      
-      for (const value of results) {
-          console.log("Item Id: " + value.item_id);
-          console.log("Product Name: " + value.product_name);
-          console.log("Price: $" + value.price);
-          console.log("Stock Quantity: " + value.stock_quantity);
-          console.log("\n----------------------------------- \n")
-      }
-      clientSelect();
+    if (error) throw error;
+    
+    for (const value of results) {
+        console.log("Item Id: " + value.item_id);
+        console.log("Product Name: " + value.product_name);
+        console.log("Price: $" + value.price);
+        console.log("Stock Quantity: " + value.stock_quantity);
+        console.log("\n----------------------------------- \n")
+    }
+    clientSelect();
     });
-     
-    // connection.end();
 }
+
 
 
 function clientSelect() {
@@ -42,14 +40,14 @@ function clientSelect() {
     inquirer
     .prompt([
         {
-        type: 'input',
+        type: 'number',
         name: 'select_item',
         message: "Please type the item ID of the item you would like to purchase:\n "
         },
         {
-        type: 'input',
+        type: 'number',
         name: 'select_quantity',
-        message: "Please type the quantity of the item you would like to purchase:\n "
+        message: "\nPlease type the quantity of the item you would like to purchase:\n "
         }
     ])
     .then(answers => {
@@ -82,8 +80,8 @@ function clientSelect() {
 
 function updateStock(itemID, newQuantity) {
 
-var itemID1 = parseInt(itemID, 10);
-var newQuantity1 = parseInt(newQuantity, 10);
+var itemID1 = itemID;
+var newQuantity1 = newQuantity;
 var queryString = 'UPDATE products SET stock_quantity=' + newQuantity1 + ' WHERE item_id=' + itemID1 + ';';
     connection.query(queryString, function(error, results) {
         if (error) throw error;
